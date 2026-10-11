@@ -2,6 +2,7 @@
 
 const CHAVE_ESTOQUE = "produtosSupermercado";
 
+// Carregamento dos produtos armazenados
 function carregarProdutos() {
     try {
         const dados = JSON.parse(localStorage.getItem(CHAVE_ESTOQUE));
@@ -15,9 +16,14 @@ let produtos = carregarProdutos();
 
 // Cadastro de produtos
 function cadastrarProduto(nome, categoria, quantidade, lote, validade) {
-    if (!nome || !categoria || !lote || !validade ||
+    if (
+        !nome || !nome.trim() ||
+        !categoria || !categoria.trim() ||
+        !lote || !lote.trim() ||
+        !validade ||
         !Number.isInteger(Number(quantidade)) ||
-        Number(quantidade) <= 0) {
+        Number(quantidade) <= 0
+    ) {
         return false;
     }
 
@@ -38,6 +44,7 @@ function cadastrarProduto(nome, categoria, quantidade, lote, validade) {
 
     produtos.push(produto);
     salvarProdutos();
+
     return true;
 }
 
@@ -82,8 +89,12 @@ function excluirProduto(id) {
 // Consulta dos produtos cadastrados
 function listarProdutos() {
     return produtos.map(produto => ({
+        ...produto,
+        situacao: verificarValidade(produto.validade)
+    }));
+}
 
-        // Atualização da lista de produtos na interface
+// Atualização da lista de produtos na interface
 function atualizarLista() {
     const lista = document.getElementById("listaProdutos");
 
@@ -159,7 +170,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const validade = document.getElementById("validade").value;
 
             const sucesso = cadastrarProduto(
-                nome, categoria, quantidade, lote, validade
+                nome,
+                categoria,
+                quantidade,
+                lote,
+                validade
             );
 
             if (sucesso) {
@@ -174,7 +189,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
     atualizarLista();
 });
-        ...produto,
-        situacao: verificarValidade(produto.validade)
-    }));
-}

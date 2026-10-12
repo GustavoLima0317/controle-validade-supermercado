@@ -61,8 +61,12 @@ function salvarProdutos() {
 }
 
 // Calcula a diferença entre datas em dias de calendário
-function calcularDiasRestantes(validade) {
-    const hoje = new Date();
+// Aceita uma data de referência opcional para testes automatizados
+function calcularDiasRestantes(validade, dataReferencia = null) {
+
+    const hoje = dataReferencia
+        ? new Date(dataReferencia + "T00:00:00")
+        : new Date();
 
     const dataAtualUTC = Date.UTC(
         hoje.getFullYear(),
@@ -72,7 +76,11 @@ function calcularDiasRestantes(validade) {
 
     const [ano, mes, dia] = validade.split("-").map(Number);
 
-    const vencimentoUTC = Date.UTC(ano, mes - 1, dia);
+    const vencimentoUTC = Date.UTC(
+        ano,
+        mes - 1,
+        dia
+    );
 
     return Math.round(
         (vencimentoUTC - dataAtualUTC) / 86400000
@@ -80,8 +88,13 @@ function calcularDiasRestantes(validade) {
 }
 
 // Classificação dos alertas
-function verificarValidade(validade) {
-    const dias = calcularDiasRestantes(validade);
+// Permite utilizar uma data de referência nos testes
+function verificarValidade(validade, dataReferencia = null) {
+
+    const dias = calcularDiasRestantes(
+        validade,
+        dataReferencia
+    );
 
     if (dias < 0) {
         return "Vencido";
@@ -118,7 +131,9 @@ function atualizarLista() {
 
     const lista = document.getElementById("listaProdutos");
 
-    if (!lista) return;
+    if (!lista) {
+        return;
+    }
 
     lista.innerHTML = "";
 
@@ -126,12 +141,16 @@ function atualizarLista() {
 
     if (cadastrados.length === 0) {
         const mensagem = document.createElement("p");
+
         mensagem.textContent = "Nenhum produto cadastrado.";
+
         lista.appendChild(mensagem);
+
         return;
     }
 
     cadastrados.forEach(produto => {
+
         const item = document.createElement("div");
         const titulo = document.createElement("h3");
         const detalhes = document.createElement("p");
@@ -151,10 +170,15 @@ function atualizarLista() {
         situacao.textContent = produto.situacao;
 
         if (produto.situacao === "Vencido") {
+
             item.className = "alerta-vermelho";
+
         } else if (produto.situacao === "Próximo do vencimento") {
+
             item.className = "alerta-amarelo";
+
         } else {
+
             item.className = "alerta-verde";
         }
 
@@ -166,11 +190,19 @@ function atualizarLista() {
         botao.type = "button";
 
         botao.addEventListener("click", () => {
+
             excluirProduto(produto.id);
+
             atualizarLista();
         });
 
-        item.append(titulo, detalhes, situacao, botao);
+        item.append(
+            titulo,
+            detalhes,
+            situacao,
+            botao
+        );
+
         lista.appendChild(item);
     });
 }
@@ -186,6 +218,7 @@ if (typeof document !== "undefined") {
         if (formulario) {
 
             formulario.addEventListener("submit", evento => {
+
                 evento.preventDefault();
 
                 const nome = document.getElementById("nome").value;
@@ -203,10 +236,15 @@ if (typeof document !== "undefined") {
                 );
 
                 if (sucesso) {
+
                     formulario.reset();
+
                     atualizarLista();
+
                     alert("Produto cadastrado com sucesso!");
+
                 } else {
+
                     alert("Verifique os dados informados.");
                 }
             });

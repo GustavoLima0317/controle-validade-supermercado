@@ -1,9 +1,14 @@
 // Sistema de Controle de Validade - Supermercado Iguatemi
 
 const CHAVE_ESTOQUE = "produtosSupermercado";
+const CHAVE_CONTRASTE = "altoContraste";
 
 // Carregamento dos produtos armazenados
 function carregarProdutos() {
+    if (typeof localStorage === "undefined") {
+        return [];
+    }
+
     try {
         const dados = JSON.parse(localStorage.getItem(CHAVE_ESTOQUE));
         return Array.isArray(dados) ? dados : [];
@@ -12,6 +17,7 @@ function carregarProdutos() {
     }
 }
 
+// Inicialização dos produtos
 let produtos = carregarProdutos();
 
 // Cadastro de produtos
@@ -50,17 +56,25 @@ function cadastrarProduto(nome, categoria, quantidade, lote, validade) {
 
 // Armazenamento local
 function salvarProdutos() {
-    localStorage.setItem(CHAVE_ESTOQUE, JSON.stringify(produtos));
+    if (typeof localStorage !== "undefined") {
+        localStorage.setItem(
+            CHAVE_ESTOQUE,
+            JSON.stringify(produtos)
+        );
+    }
 }
 
 // Calcula a diferença entre datas em dias de calendário
-function calcularDiasRestantes(validade) {
-    const hoje = new Date();
+function calcularDiasRestantes(validade, hoje = new Date()) {
+
+    const dataAtual = typeof hoje === "string"
+        ? new Date(hoje + "T00:00:00")
+        : hoje;
 
     const dataAtualUTC = Date.UTC(
-        hoje.getFullYear(),
-        hoje.getMonth(),
-        hoje.getDate()
+        dataAtual.getFullYear(),
+        dataAtual.getMonth(),
+        dataAtual.getDate()
     );
 
     const [ano, mes, dia] = validade.split("-").map(Number);
@@ -73,8 +87,8 @@ function calcularDiasRestantes(validade) {
 }
 
 // Classificação dos alertas
-function verificarValidade(validade) {
-    const dias = calcularDiasRestantes(validade);
+function verificarValidade(validade, hoje = new Date()) {
+    const dias = calcularDiasRestantes(validade, hoje);
 
     if (dias < 0) {
         return "Vencido";
@@ -89,7 +103,10 @@ function verificarValidade(validade) {
 
 // Exclusão de produtos
 function excluirProduto(id) {
-    produtos = produtos.filter(produto => produto.id !== id);
+    produtos = produtos.filter(
+        produto => produto.id !== id
+    );
+
     salvarProdutos();
 }
 
@@ -103,6 +120,12 @@ function listarProdutos() {
 
 // Atualização da lista de produtos na interface
 function atualizarLista() {
+
+    // Impede erros durante testes no Node.js
+    if (typeof document === "undefined") {
+        return;
+    }
+
     const lista = document.getElementById("listaProdutos");
 
     if (!lista) return;
@@ -113,12 +136,15 @@ function atualizarLista() {
 
     if (cadastrados.length === 0) {
         const mensagem = document.createElement("p");
+
         mensagem.textContent = "Nenhum produto cadastrado.";
+
         lista.appendChild(mensagem);
         return;
     }
 
     cadastrados.forEach(produto => {
+
         const item = document.createElement("div");
         const titulo = document.createElement("h3");
         const detalhes = document.createElement("p");
@@ -139,8 +165,12 @@ function atualizarLista() {
 
         if (produto.situacao === "Vencido") {
             item.className = "alerta-vermelho";
-        } else if (produto.situacao === "Próximo do vencimento") {
+
+        } else if (
+            produto.situacao === "Próximo do vencimento"
+        ) {
             item.className = "alerta-amarelo";
+
         } else {
             item.className = "alerta-verde";
         }
@@ -157,42 +187,175 @@ function atualizarLista() {
             atualizarLista();
         });
 
-        item.append(titulo, detalhes, situacao, botao);
+        item.append(
+            titulo,
+            detalhes,
+            situacao,
+            botao
+        );
+
         lista.appendChild(item);
     });
 }
 
-// Conexão do formulário com o cadastro
-document.addEventListener("DOMContentLoaded", () => {
-    const formulario = document.getElementById("formProduto");
+// ==========================================
+// RECURSO DE ACESSIBILIDADE
+// MODO DE ALTO CONTRASTE
+// ==========================================
 
-    if (formulario) {
-        formulario.addEventListener("submit", evento => {
-            evento.preventDefault();
+// Atualiza o texto e o estado do botão
+function atualizarBotaoContraste() {
 
-            const nome = document.getElementById("nome").value;
-            const categoria = document.getElementById("categoria").value;
-            const quantidade = document.getElementById("quantidade").value;
-            const lote = document.getElementById("lote").value;
-            const validade = document.getElementById("validade").value;
-
-            const sucesso = cadastrarProduto(
-                nome,
-                categoria,
-                quantidade,
-                lote,
-                validade
-            );
-
-            if (sucesso) {
-                formulario.reset();
-                atualizarLista();
-                alert("Produto cadastrado com sucesso!");
-            } else {
-                alert("Verifique os dados informados.");
-            }
-        });
+    if (typeof document === "undefined") {
+        return;
     }
 
-    atualizarLista();
-});
+    const botao = document.getElementById("botaoContraste");
+
+    if (!botao) return;
+
+    const ativado = document.body.classList.contains(
+        "alto-contraste"
+    );
+
+    botao.textContent = ativado
+        ? "Desativar alto contraste"
+        : "Ativar alto contraste";
+
+    botao.setAttribute("aria-pressed", String(ativado));
+}
+
+// Ativa ou desativa o modo de alto contraste
+function alternarContraste() {
+
+    if (typeof document === "undefined") {
+        return;
+    }
+
+    document.body.classList.toggle("alto-contraste");
+
+    const ativado = document.body.classList.contains(
+        "alto-contraste"
+    );
+
+    // Salva a preferência do usuário
+    if (typeof localStorage !== "undefined") {
+        localStorage.setItem(
+            CHAVE_CONTRASTE,
+            String(ativado)
+        );
+    }
+
+    atualizarBotaoContraste();
+}
+
+// Recupera a preferência de acessibilidade
+function carregarPreferenciaContraste() {
+
+    if (typeof document === "undefined") {
+        return;
+    }
+
+    if (typeof localStorage !== "undefined") {
+
+        const preferencia = localStorage.getItem(
+            CHAVE_CONTRASTE
+        );
+
+        if (preferencia === "true") {
+            document.body.classList.add("alto-contraste");
+        }
+    }
+
+    atualizarBotaoContraste();
+}
+
+// ==========================================
+// INICIALIZAÇÃO DO SISTEMA
+// ==========================================
+
+// Executa somente quando estiver no navegador
+if (typeof document !== "undefined") {
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        // Inicialização do recurso de acessibilidade
+        carregarPreferenciaContraste();
+
+        const botaoContraste = document.getElementById(
+            "botaoContraste"
+        );
+
+        if (botaoContraste) {
+            botaoContraste.addEventListener(
+                "click",
+                alternarContraste
+            );
+        }
+
+        // Formulário de cadastro
+        const formulario = document.getElementById(
+            "formProduto"
+        );
+
+        if (formulario) {
+
+            formulario.addEventListener("submit", evento => {
+
+                evento.preventDefault();
+
+                const nome = document.getElementById("nome").value;
+                const categoria = document.getElementById("categoria").value;
+                const quantidade = document.getElementById("quantidade").value;
+                const lote = document.getElementById("lote").value;
+                const validade = document.getElementById("validade").value;
+
+                const sucesso = cadastrarProduto(
+                    nome,
+                    categoria,
+                    quantidade,
+                    lote,
+                    validade
+                );
+
+                if (sucesso) {
+
+                    formulario.reset();
+                    atualizarLista();
+
+                    alert("Produto cadastrado com sucesso!");
+
+                } else {
+
+                    alert("Verifique os dados informados.");
+                }
+            });
+        }
+
+        atualizarLista();
+    });
+}
+
+// ==========================================
+// EXPORTAÇÃO PARA TESTES AUTOMATIZADOS
+// ==========================================
+
+// Permite executar os testes no Node.js
+// sem afetar o funcionamento no navegador
+
+if (typeof module !== "undefined" && module.exports) {
+
+    module.exports = {
+        carregarProdutos,
+        cadastrarProduto,
+        salvarProdutos,
+        calcularDiasRestantes,
+        verificarValidade,
+        excluirProduto,
+        listarProdutos,
+        atualizarLista,
+        alternarContraste,
+        carregarPreferenciaContraste,
+        atualizarBotaoContraste
+    };
+}

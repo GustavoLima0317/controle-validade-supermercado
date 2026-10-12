@@ -4,6 +4,10 @@ const CHAVE_ESTOQUE = "produtosSupermercado";
 
 // Carregamento dos produtos armazenados
 function carregarProdutos() {
+    if (typeof localStorage === "undefined") {
+        return [];
+    }
+
     try {
         const dados = JSON.parse(localStorage.getItem(CHAVE_ESTOQUE));
         return Array.isArray(dados) ? dados : [];
@@ -12,6 +16,7 @@ function carregarProdutos() {
     }
 }
 
+// Inicialização dos produtos
 let produtos = carregarProdutos();
 
 // Cadastro de produtos
@@ -50,7 +55,9 @@ function cadastrarProduto(nome, categoria, quantidade, lote, validade) {
 
 // Armazenamento local
 function salvarProdutos() {
-    localStorage.setItem(CHAVE_ESTOQUE, JSON.stringify(produtos));
+    if (typeof localStorage !== "undefined") {
+        localStorage.setItem(CHAVE_ESTOQUE, JSON.stringify(produtos));
+    }
 }
 
 // Calcula a diferença entre datas em dias de calendário
@@ -103,6 +110,12 @@ function listarProdutos() {
 
 // Atualização da lista de produtos na interface
 function atualizarLista() {
+
+    // Impede erros durante testes no Node.js
+    if (typeof document === "undefined") {
+        return;
+    }
+
     const lista = document.getElementById("listaProdutos");
 
     if (!lista) return;
@@ -163,36 +176,58 @@ function atualizarLista() {
 }
 
 // Conexão do formulário com o cadastro
-document.addEventListener("DOMContentLoaded", () => {
-    const formulario = document.getElementById("formProduto");
+// Executa somente quando estiver no navegador
+if (typeof document !== "undefined") {
 
-    if (formulario) {
-        formulario.addEventListener("submit", evento => {
-            evento.preventDefault();
+    document.addEventListener("DOMContentLoaded", () => {
 
-            const nome = document.getElementById("nome").value;
-            const categoria = document.getElementById("categoria").value;
-            const quantidade = document.getElementById("quantidade").value;
-            const lote = document.getElementById("lote").value;
-            const validade = document.getElementById("validade").value;
+        const formulario = document.getElementById("formProduto");
 
-            const sucesso = cadastrarProduto(
-                nome,
-                categoria,
-                quantidade,
-                lote,
-                validade
-            );
+        if (formulario) {
 
-            if (sucesso) {
-                formulario.reset();
-                atualizarLista();
-                alert("Produto cadastrado com sucesso!");
-            } else {
-                alert("Verifique os dados informados.");
-            }
-        });
-    }
+            formulario.addEventListener("submit", evento => {
+                evento.preventDefault();
 
-    atualizarLista();
-});
+                const nome = document.getElementById("nome").value;
+                const categoria = document.getElementById("categoria").value;
+                const quantidade = document.getElementById("quantidade").value;
+                const lote = document.getElementById("lote").value;
+                const validade = document.getElementById("validade").value;
+
+                const sucesso = cadastrarProduto(
+                    nome,
+                    categoria,
+                    quantidade,
+                    lote,
+                    validade
+                );
+
+                if (sucesso) {
+                    formulario.reset();
+                    atualizarLista();
+                    alert("Produto cadastrado com sucesso!");
+                } else {
+                    alert("Verifique os dados informados.");
+                }
+            });
+        }
+
+        atualizarLista();
+    });
+}
+
+// Exportação das funções para testes automatizados
+// Permite executar os testes no Node.js sem afetar o navegador
+if (typeof module !== "undefined" && module.exports) {
+
+    module.exports = {
+        carregarProdutos,
+        cadastrarProduto,
+        salvarProdutos,
+        calcularDiasRestantes,
+        verificarValidade,
+        excluirProduto,
+        listarProdutos,
+        atualizarLista
+    };
+}

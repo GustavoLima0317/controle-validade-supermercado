@@ -53,15 +53,22 @@ function salvarProdutos() {
     localStorage.setItem(CHAVE_ESTOQUE, JSON.stringify(produtos));
 }
 
-// Cálculo de dias restantes
+// Calcula a diferença entre datas em dias de calendário
 function calcularDiasRestantes(validade) {
     const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
 
-    const vencimento = new Date(validade + "T00:00:00");
+    const dataAtualUTC = Date.UTC(
+        hoje.getFullYear(),
+        hoje.getMonth(),
+        hoje.getDate()
+    );
+
+    const [ano, mes, dia] = validade.split("-").map(Number);
+
+    const vencimentoUTC = Date.UTC(ano, mes - 1, dia);
 
     return Math.round(
-        (vencimento - hoje) / (1000 * 60 * 60 * 24)
+        (vencimentoUTC - dataAtualUTC) / 86400000
     );
 }
 

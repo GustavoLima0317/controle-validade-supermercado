@@ -1,3 +1,8 @@
+/* ==========================================
+   Sistema de Controle de Validade
+   Supermercado Iguatemi
+   ========================================== */
+
 /* Estilo geral do sistema */
 
 * {
@@ -30,6 +35,29 @@ header p {
     margin-top: 10px;
 }
 
+/* Botão de acessibilidade */
+
+#botaoContraste {
+    margin-top: 15px;
+    padding: 12px 20px;
+    background-color: #ffffff;
+    color: #176b3a;
+    border: 2px solid #ffffff;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#botaoContraste:hover {
+    background-color: #e8f5e9;
+}
+
+#botaoContraste:focus-visible {
+    outline: 3px solid #ffcc00;
+    outline-offset: 4px;
+}
+
 /* Conteúdo principal */
 
 main {
@@ -48,6 +76,19 @@ section {
 
 h2 {
     color: #176b3a;
+}
+
+/* Formulário de cadastro */
+
+input {
+    padding: 8px;
+    margin: 5px;
+    border: 1px solid #777;
+    border-radius: 4px;
+}
+
+button {
+    cursor: pointer;
 }
 
 /* Lista de funcionalidades */
@@ -91,9 +132,126 @@ footer {
     color: white;
 }
 
-/* Responsividade */
+/* ==========================================
+   RECURSO DE ACESSIBILIDADE
+   MODO DE ALTO CONTRASTE
+   ========================================== */
+
+/* Fundo geral */
+
+body.alto-contraste {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+/* Cabeçalho e rodapé */
+
+body.alto-contraste header,
+body.alto-contraste footer {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffff00;
+}
+
+/* Seções */
+
+body.alto-contraste section {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffff00;
+    box-shadow: none;
+}
+
+/* Títulos */
+
+body.alto-contraste h1,
+body.alto-contraste h2,
+body.alto-contraste h3 {
+    color: #ffff00;
+}
+
+/* Parágrafos e textos */
+
+body.alto-contraste p,
+body.alto-contraste label {
+    color: #ffffff;
+}
+
+/* Campos de entrada */
+
+body.alto-contraste input {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffff00;
+    padding: 10px;
+}
+
+/* Botões */
+
+body.alto-contraste button {
+    background-color: #ffff00;
+    color: #000000;
+    border: 2px solid #ffffff;
+    padding: 10px 15px;
+    font-weight: bold;
+}
+
+/* Destaque ao navegar pelo teclado */
+
+body.alto-contraste button:focus-visible,
+body.alto-contraste input:focus-visible {
+    outline: 3px solid #00ffff;
+    outline-offset: 3px;
+}
+
+/* Lista de funcionalidades */
+
+body.alto-contraste li {
+    background-color: #111111;
+    color: #ffffff;
+    border-left: 5px solid #ffff00;
+}
+
+/* Alertas de validade */
+
+/* Produto dentro do prazo */
+
+body.alto-contraste .alerta-verde {
+    background-color: #003300;
+    color: #ffffff;
+    border: 2px solid #00ff00;
+}
+
+/* Produto próximo do vencimento */
+
+body.alto-contraste .alerta-amarelo {
+    background-color: #332800;
+    color: #ffffff;
+    border: 2px solid #ffff00;
+}
+
+/* Produto vencido */
+
+body.alto-contraste .alerta-vermelho {
+    background-color: #330000;
+    color: #ffffff;
+    border: 2px solid #ff4444;
+}
+
+/* Textos internos dos alertas */
+
+body.alto-contraste .alerta-verde p,
+body.alto-contraste .alerta-amarelo p,
+body.alto-contraste .alerta-vermelho p {
+    color: #ffffff;
+}
+
+/* ==========================================
+   RESPONSIVIDADE
+   ========================================== */
 
 @media (max-width: 768px) {
+
     main {
         margin: 10px;
         padding: 10px;
@@ -105,5 +263,14 @@ footer {
 
     section {
         padding: 15px;
+    }
+
+    #botaoContraste {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    input {
+        max-width: 100%;
     }
 }

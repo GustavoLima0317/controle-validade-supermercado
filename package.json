@@ -1,0 +1,10 @@
+{
+  "name": "controle-validade-supermercado",
+  "version": "1.0.0",
+  "description": "Sistema de controle de validade de produtos do Supermercado Iguatemi",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage"
+  }
+}
